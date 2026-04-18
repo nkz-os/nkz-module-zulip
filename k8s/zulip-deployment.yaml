@@ -70,7 +70,7 @@ spec:
                   name: zulip-config
                   key: admin-email
             - name: ZULIP_AUTH_BACKENDS
-              value: "EmailAuthBackend"
+              value: "EmailAuthBackend,GenericOpenIdConnectBackend"
             - name: SETTING_SECRET_KEY
               valueFrom:
                 secretKeyRef:
@@ -119,9 +119,18 @@ spec:
             - name: SETTING_MEMCACHED_LOCATION
               value: "zulip-memcached-service:11211"
 
-            # --- OIDC (Keycloak) — disabled for PoC, enable in Fase 2 ---
-            # SETTING_SOCIAL_AUTH_OIDC_ENABLED_IDPS requires Python dict syntax
-            # Configure after Keycloak client is created (ZULIP-4)
+            # --- OIDC (Keycloak) ---
+            # Value is Python dict literal (docker-zulip writes it verbatim to settings.py)
+            - name: SETTING_SOCIAL_AUTH_OIDC_ENABLED_IDPS
+              value: >-
+                {"keycloak": {"oidc_url": "https://auth.robotika.cloud/auth/realms/nekazari", "display_name": "Nekazari SSO", "display_icon": None, "client_id": "zulip", "secret": get_secret("social_auth_oidc_secret"), "auto_signup": True}}
+            - name: SETTING_SOCIAL_AUTH_OIDC_FULL_NAME_VALIDATED
+              value: "True"
+            - name: SECRETS_social_auth_oidc_secret
+              valueFrom:
+                secretKeyRef:
+                  name: zulip-secret
+                  key: oidc-client-secret
 
             # --- Email (disabled for PoC) ---
             - name: SETTING_EMAIL_HOST
