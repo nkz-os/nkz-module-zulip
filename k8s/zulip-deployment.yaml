@@ -129,6 +129,12 @@ spec:
             - name: SETTING_NOREPLY_EMAIL_ADDRESS
               value: "noreply@robotika.cloud"
 
+            # --- Reverse proxy (Traefik) ---
+            - name: SETTING_USE_X_FORWARDED_HOST
+              value: "True"
+            - name: LOADBALANCER_IPS
+              value: "10.42.0.0/16"
+
             # --- Performance tuning for low-RAM ---
             - name: SETTING_TORNADO_PROCESSES
               value: "1"
