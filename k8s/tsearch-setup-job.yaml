@@ -1,0 +1,198 @@
+# Zulip tsearch files ConfigMap
+#
+# Zulip's 0001_initial migration creates a PostgreSQL full-text search
+# configuration requiring three files in /usr/share/postgresql/14/tsearch_data/:
+#   - en_us.dict    (hunspell English dictionary, from hunspell-en-us package)
+#   - en_us.affix   (hunspell English affix rules, from hunspell-en-us package)
+#   - zulip_english.stop (custom Zulip stop words, provided below)
+#
+# The standard postgres:14 image does NOT include hunspell.
+# These files must be installed manually after PostgreSQL starts.
+#
+# INSTALLATION (run once after PostgreSQL pod starts, or after pod restart):
+#
+#   # 1. Install hunspell on the host (if not already installed)
+#   sudo apt-get install -y hunspell-en-us
+#
+#   # 2. Get PostgreSQL container PID
+#   PG_PID=$(sudo crictl inspect $(sudo crictl ps --name postgresql -q | head -1) \
+#     | python3 -c "import sys,json; print(json.load(sys.stdin)['info']['pid'])")
+#
+#   # 3. Copy hunspell files into PostgreSQL container
+#   TSEARCH="/proc/$PG_PID/root/usr/share/postgresql/14/tsearch_data"
+#   sudo cp /usr/share/hunspell/en_US.dic $TSEARCH/en_us.dict
+#   sudo cp /usr/share/hunspell/en_US.aff $TSEARCH/en_us.affix
+#
+#   # 4. Apply this ConfigMap and copy stop words
+#   sudo kubectl apply -f tsearch-setup-job.yaml
+#   sudo kubectl cp nekazari/$(sudo kubectl get pod -n nekazari -l app=zulip-tsearch-helper \
+#     -o jsonpath='{.items[0].metadata.name}'):/stop/zulip_english.stop \
+#     /tmp/zulip_english.stop
+#   sudo cp /tmp/zulip_english.stop $TSEARCH/zulip_english.stop
+#
+#   # OR simply create the stop words file directly:
+#   sudo kubectl get configmap zulip-tsearch-files -n nekazari \
+#     -o jsonpath='{.data.zulip_english\.stop}' | sudo tee $TSEARCH/zulip_english.stop
+#
+# PERMANENT FIX (future): Add an init container to the PostgreSQL deployment
+# that installs hunspell-en-us and copies zulip_english.stop from this ConfigMap.
+#
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zulip-tsearch-files
+  namespace: nekazari
+  labels:
+    app: zulip
+    component: tsearch
+data:
+  zulip_english.stop: |
+    i
+    me
+    my
+    myself
+    we
+    our
+    ours
+    ourselves
+    you
+    your
+    yours
+    yourself
+    yourselves
+    he
+    him
+    his
+    himself
+    she
+    her
+    hers
+    herself
+    it
+    its
+    itself
+    they
+    them
+    their
+    theirs
+    themselves
+    what
+    which
+    who
+    whom
+    this
+    that
+    these
+    those
+    am
+    is
+    are
+    was
+    were
+    be
+    been
+    being
+    have
+    has
+    had
+    having
+    do
+    does
+    did
+    doing
+    a
+    an
+    the
+    and
+    but
+    if
+    or
+    because
+    as
+    until
+    while
+    of
+    at
+    by
+    for
+    with
+    about
+    against
+    between
+    into
+    through
+    during
+    before
+    after
+    above
+    below
+    to
+    from
+    up
+    down
+    in
+    out
+    on
+    off
+    over
+    under
+    again
+    further
+    then
+    once
+    here
+    there
+    when
+    where
+    why
+    how
+    all
+    any
+    both
+    each
+    few
+    more
+    most
+    other
+    some
+    such
+    no
+    nor
+    not
+    only
+    own
+    same
+    so
+    than
+    too
+    very
+    s
+    t
+    can
+    will
+    just
+    don
+    should
+    now
+    b
+    c
+    d
+    e
+    f
+    g
+    h
+    j
+    k
+    l
+    m
+    n
+    o
+    p
+    q
+    r
+    u
+    v
+    w
+    x
+    y
+    z
