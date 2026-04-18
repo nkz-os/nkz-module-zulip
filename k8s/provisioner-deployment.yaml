@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zulip-provisioner
+  namespace: nekazari
+  labels:
+    app: zulip
+    component: provisioner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zulip
+      component: provisioner
+  template:
+    metadata:
+      labels:
+        app: zulip
+        component: provisioner
+    spec:
+      containers:
+        - name: provisioner
+          image: ghcr.io/nkz-os/nkz-module-zulip/provisioner:latest
+          ports:
+            - containerPort: 5000
+              name: http
+          env:
+            - name: KEYCLOAK_URL
+              value: "http://keycloak-service:8080/auth"
+            - name: KEYCLOAK_REALM
+              value: "nekazari"
+            - name: KEYCLOAK_ADMIN_USER
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: admin-user
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-secret
+                  key: admin-password
+            - name: ZULIP_URL
+              value: "http://zulip-service"
+            - name: ZULIP_ADMIN_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: zulip-config
+                  key: admin-email
+            - name: ZULIP_ADMIN_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: zulip-secret
+                  key: admin-api-key
+            - name: ZULIP_EXTERNAL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: zulip-config
+                  key: external-host
+            - name: REDIS_URL
+              value: "redis://redis-service:6379/4"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zulip-provisioner-service
+  namespace: nekazari
+  labels:
+    app: zulip
+    component: provisioner
+spec:
+  selector:
+    app: zulip
+    component: provisioner
+  ports:
+    - port: 5000
+      targetPort: 5000
+      name: http

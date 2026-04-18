@@ -1,0 +1,13 @@
+{
+  "title": "Communications",
+  "openInNewTab": "Open in new tab",
+  "iframeTitle": "Messaging",
+  "loading": "Loading messaging...",
+  "connectionLost": "Connection lost. Reconnecting...",
+  "connectionError": "Could not connect to messaging server",
+  "unreadAlerts": "Unread alerts",
+  "streams": "Streams",
+  "noMessages": "No messages yet",
+  "retry": "Retry",
+  "poweredBy": "Powered by Zulip"
+}

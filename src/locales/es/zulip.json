@@ -1,0 +1,13 @@
+{
+  "title": "Comunicaciones",
+  "openInNewTab": "Abrir en nueva pestaña",
+  "iframeTitle": "Mensajería",
+  "loading": "Cargando mensajería...",
+  "connectionLost": "Conexión perdida. Reconectando...",
+  "connectionError": "No se pudo conectar con el servidor de mensajería",
+  "unreadAlerts": "Alertas sin leer",
+  "streams": "Canales",
+  "noMessages": "No hay mensajes aún",
+  "retry": "Reintentar",
+  "poweredBy": "Powered by Zulip"
+}

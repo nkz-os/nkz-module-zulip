@@ -1,0 +1,179 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zulip
+  namespace: nekazari
+  labels:
+    app: zulip
+    component: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zulip
+      component: server
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: zulip
+        component: server
+    spec:
+      initContainers:
+        - name: wait-for-deps
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for PostgreSQL..."
+              until nc -z postgresql 5432; do sleep 2; done
+              echo "Waiting for Redis..."
+              until nc -z redis-service 6379; do sleep 2; done
+              echo "Waiting for RabbitMQ..."
+              until nc -z zulip-rabbitmq-service 5672; do sleep 2; done
+              echo "Waiting for Memcached..."
+              until nc -z zulip-memcached-service 11211; do sleep 2; done
+              echo "All dependencies ready."
+          resources:
+            requests:
+              memory: "32Mi"
+              cpu: "25m"
+            limits:
+              memory: "64Mi"
+              cpu: "100m"
+      containers:
+        - name: zulip
+          image: zulip/docker-zulip:9.4-0
+          ports:
+            - containerPort: 80
+              name: http
+            - containerPort: 443
+              name: https
+          env:
+            # --- Disable internal SSL (TLS terminates at Traefik) ---
+            - name: SSL_CERTIFICATE_GENERATION
+              value: "self-signed"
+            - name: DISABLE_HTTPS
+              value: "true"
+
+            # --- Zulip settings ---
+            - name: SETTING_EXTERNAL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: zulip-config
+                  key: external-host
+            - name: SETTING_ZULIP_ADMINISTRATOR
+              valueFrom:
+                configMapKeyRef:
+                  name: zulip-config
+                  key: admin-email
+            - name: ZULIP_AUTH_BACKENDS
+              value: "OpenIdConnectBackend"
+            - name: SETTING_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: zulip-secret
+                  key: secret-key
+
+            # --- Database (reuse NKZ PostgreSQL) ---
+            - name: SETTING_DATABASES__default__NAME
+              value: "nkz_zulip"
+            - name: SETTING_DATABASES__default__USER
+              valueFrom:
+                secretKeyRef:
+                  name: nekazari-secrets
+                  key: postgresql-user
+            - name: SETTING_DATABASES__default__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: zulip-secret
+                  key: db-password
+            - name: SETTING_DATABASES__default__HOST
+              value: "postgresql"
+            - name: SETTING_DATABASES__default__PORT
+              value: "5432"
+
+            # --- Redis (reuse NKZ Redis, DB index 3) ---
+            - name: SETTING_REDIS_HOST
+              value: "redis-service"
+            - name: SETTING_REDIS_PORT
+              value: "6379"
+
+            # --- RabbitMQ (dedicated in-cluster) ---
+            - name: SETTING_RABBITMQ_HOST
+              value: "zulip-rabbitmq-service"
+            - name: SETTING_RABBITMQ_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: zulip-secret
+                  key: rabbitmq-user
+            - name: SETTING_RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: zulip-secret
+                  key: rabbitmq-password
+
+            # --- Memcached (dedicated in-cluster) ---
+            - name: SETTING_MEMCACHED_LOCATION
+              value: "zulip-memcached-service:11211"
+
+            # --- OIDC (Keycloak) ---
+            - name: SETTING_SOCIAL_AUTH_OIDC_ENABLED_IDPS
+              value: >-
+                {"keycloak": {"display_name": "NKZ Login", "display_icon": null, "oidc_url": "https://YOUR_KEYCLOAK_HOST/auth/realms/nekazari", "client_id": "zulip", "secret": "PLACEHOLDER", "auto_signup": true}}
+
+            # --- Email (disabled for PoC) ---
+            - name: SETTING_EMAIL_HOST
+              value: ""
+            - name: SETTING_NOREPLY_EMAIL_ADDRESS
+              value: "noreply@robotika.cloud"
+
+            # --- Performance tuning for low-RAM ---
+            - name: SETTING_TORNADO_PROCESSES
+              value: "1"
+
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "200m"
+            limits:
+              memory: "2Gi"
+              cpu: "1500m"
+          livenessProbe:
+            httpGet:
+              path: /api/v1/server_settings
+              port: 80
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /api/v1/server_settings
+              port: 80
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: zulip-data
+              mountPath: /data
+      volumes:
+        - name: zulip-data
+          persistentVolumeClaim:
+            claimName: zulip-data-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: zulip-data-pvc
+  namespace: nekazari
+  labels:
+    app: zulip
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

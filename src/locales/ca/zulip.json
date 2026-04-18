@@ -1,0 +1,13 @@
+{
+  "title": "Comunicacions",
+  "openInNewTab": "Obrir en una nova pestanya",
+  "iframeTitle": "Missatgeria",
+  "loading": "Carregant missatgeria...",
+  "connectionLost": "Connexió perduda. Reconnectant...",
+  "connectionError": "No s'ha pogut connectar amb el servidor de missatgeria",
+  "unreadAlerts": "Alertes sense llegir",
+  "streams": "Canals",
+  "noMessages": "Encara no hi ha missatges",
+  "retry": "Reintentar",
+  "poweredBy": "Powered by Zulip"
+}

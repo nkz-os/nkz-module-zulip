@@ -1,0 +1,13 @@
+{
+  "title": "Komunikazioak",
+  "openInNewTab": "Fitxa berrian ireki",
+  "iframeTitle": "Mezularitza",
+  "loading": "Mezularitza kargatzen...",
+  "connectionLost": "Konexioa galdu da. Birkonektatzen...",
+  "connectionError": "Ezin izan da mezularitza zerbitzarira konektatu",
+  "unreadAlerts": "Irakurri gabeko alertak",
+  "streams": "Kanalak",
+  "noMessages": "Ez dago mezurik oraindik",
+  "retry": "Berriro saiatu",
+  "poweredBy": "Powered by Zulip"
+}

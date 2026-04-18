@@ -1,0 +1,54 @@
+{
+  "id": "zulip",
+  "name": "nkz-module-zulip",
+  "display_name": "Communications (Zulip)",
+  "version": "0.1.0",
+  "description": "Sovereign messaging platform with IoT alert integration for team collaboration.",
+  "short_description": "Team Messaging & Alerts",
+  "icon": "message-circle",
+  "author": {
+    "name": "nkz-os",
+    "email": "support@robotika.cloud",
+    "url": "https://robotika.cloud"
+  },
+  "category": "communications",
+  "module_type": "ADDON_FREE",
+  "required_plan_type": "basic",
+  "pricing_tier": "FREE",
+  "route_path": "/communications",
+  "label": "Comunicaciones",
+  "required_roles": ["User", "TenantAdmin", "PlatformAdmin"],
+  "navigation": {
+    "enabled": true,
+    "priority": 80,
+    "section": "main",
+    "icon": "message-circle"
+  },
+  "dependencies": {
+    "sdk_version": "^1.0.3",
+    "react_version": "^18.3.1",
+    "platform_version": "^2.0.0"
+  },
+  "build_config": {
+    "type": "iife",
+    "remote_entry_url": "/modules/zulip/nekazari-module.js"
+  },
+  "slots": {
+    "map-layer": [],
+    "layer-toggle": [],
+    "context-panel": ["MessagingPanel"],
+    "bottom-panel": [],
+    "entity-tree": [],
+    "dashboard-widget": ["UnreadAlerts"]
+  },
+  "metadata": {
+    "icon": "\ud83d\udcac",
+    "color": "#1e3a8a",
+    "features": [
+      "Team Messaging",
+      "IoT Alert Streams",
+      "FIWARE Integration",
+      "Sovereign Data"
+    ]
+  }
+}
