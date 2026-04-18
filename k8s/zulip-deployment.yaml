@@ -28,7 +28,7 @@ spec:
             - -c
             - |
               echo "Waiting for PostgreSQL..."
-              until nc -z postgresql 5432; do sleep 2; done
+              until nc -z postgresql-service 5432; do sleep 2; done
               echo "Waiting for Redis..."
               until nc -z redis-service 6379; do sleep 2; done
               echo "Waiting for RabbitMQ..."
@@ -82,16 +82,16 @@ spec:
               value: "nkz_zulip"
             - name: SETTING_DATABASES__default__USER
               valueFrom:
-                secretKeyRef:
-                  name: nekazari-secrets
-                  key: postgresql-user
+                configMapKeyRef:
+                  name: nekazari-config
+                  key: POSTGRES_USER
             - name: SETTING_DATABASES__default__PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: zulip-secret
-                  key: db-password
+                  name: postgresql-secret
+                  key: password
             - name: SETTING_DATABASES__default__HOST
-              value: "postgresql"
+              value: "postgresql-service"
             - name: SETTING_DATABASES__default__PORT
               value: "5432"
 
@@ -136,8 +136,8 @@ spec:
 
           resources:
             requests:
-              memory: "1Gi"
-              cpu: "200m"
+              memory: "512Mi"
+              cpu: "25m"
             limits:
               memory: "2Gi"
               cpu: "1500m"

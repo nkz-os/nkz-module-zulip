@@ -19,24 +19,24 @@ spec:
             - -c
             - |
               echo "Checking if database nkz_zulip exists..."
-              if psql -h postgresql -U "$POSTGRES_USER" -lqt | cut -d \| -f 1 | grep -qw nkz_zulip; then
+              if psql -h postgresql-service -U "$POSTGRES_USER" -lqt | cut -d \| -f 1 | grep -qw nkz_zulip; then
                 echo "Database nkz_zulip already exists. Skipping."
               else
                 echo "Creating database nkz_zulip..."
-                createdb -h postgresql -U "$POSTGRES_USER" nkz_zulip
+                createdb -h postgresql-service -U "$POSTGRES_USER" nkz_zulip
                 echo "Database nkz_zulip created."
               fi
           env:
             - name: POSTGRES_USER
               valueFrom:
-                secretKeyRef:
-                  name: nekazari-secrets
-                  key: postgresql-user
+                configMapKeyRef:
+                  name: nekazari-config
+                  key: POSTGRES_USER
             - name: PGPASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: nekazari-secrets
-                  key: postgresql-password
+                  name: postgresql-secret
+                  key: password
           resources:
             requests:
               memory: "64Mi"

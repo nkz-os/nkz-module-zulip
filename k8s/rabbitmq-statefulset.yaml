@@ -42,8 +42,8 @@ spec:
               value: "zulip"
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "100m"
+              memory: "128Mi"
+              cpu: "10m"
             limits:
               memory: "512Mi"
               cpu: "500m"
