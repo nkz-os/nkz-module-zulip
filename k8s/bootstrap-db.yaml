@@ -18,14 +18,41 @@ spec:
             - sh
             - -c
             - |
-              echo "Checking if database nkz_zulip exists..."
-              if psql -h postgresql-service -U "$POSTGRES_USER" -lqt | cut -d \| -f 1 | grep -qw nkz_zulip; then
-                echo "Database nkz_zulip already exists. Skipping."
+              echo "=== Zulip Database Bootstrap ==="
+
+              # 1. Create database 'zulip' if it doesn't exist
+              if psql -h postgresql-service -U "$POSTGRES_USER" -lqt | cut -d \| -f 1 | grep -qw zulip; then
+                echo "Database 'zulip' already exists."
               else
-                echo "Creating database nkz_zulip..."
-                createdb -h postgresql-service -U "$POSTGRES_USER" nkz_zulip
-                echo "Database nkz_zulip created."
+                echo "Creating database 'zulip'..."
+                createdb -h postgresql-service -U "$POSTGRES_USER" zulip
+                echo "Database 'zulip' created."
               fi
+
+              # 2. Create role 'zulip' if it doesn't exist
+              psql -h postgresql-service -U "$POSTGRES_USER" -d zulip -c \
+                "DO \$\$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'zulip') THEN CREATE ROLE zulip WITH LOGIN PASSWORD '$PGPASSWORD'; END IF; END \$\$;"
+              echo "Role 'zulip' ensured."
+
+              # 3. Create schema 'zulip' and set permissions
+              psql -h postgresql-service -U "$POSTGRES_USER" -d zulip -c \
+                "CREATE SCHEMA IF NOT EXISTS zulip AUTHORIZATION zulip;
+                 ALTER ROLE zulip SET search_path TO zulip,public;
+                 GRANT ALL ON SCHEMA zulip TO zulip;
+                 GRANT ALL ON SCHEMA public TO zulip;
+                 ALTER DATABASE zulip OWNER TO zulip;"
+              echo "Schema and permissions configured."
+
+              # 4. Install hunspell dictionary files for Zulip full-text search
+              # These files are needed by Zulip's 0001_initial migration
+              TSEARCH_DIR="/tsearch-output"
+              if [ -d "$TSEARCH_DIR" ]; then
+                echo "tsearch files already handled by init container."
+              else
+                echo "Warning: tsearch files must be installed manually in PostgreSQL."
+              fi
+
+              echo "=== Bootstrap complete ==="
           env:
             - name: POSTGRES_USER
               valueFrom:

@@ -70,7 +70,7 @@ spec:
                   name: zulip-config
                   key: admin-email
             - name: ZULIP_AUTH_BACKENDS
-              value: "OpenIdConnectBackend"
+              value: "EmailAuthBackend"
             - name: SETTING_SECRET_KEY
               valueFrom:
                 secretKeyRef:
@@ -78,28 +78,28 @@ spec:
                   key: secret-key
 
             # --- Database (reuse NKZ PostgreSQL) ---
-            - name: SETTING_DATABASES__default__NAME
-              value: "nkz_zulip"
-            - name: SETTING_DATABASES__default__USER
-              valueFrom:
-                configMapKeyRef:
-                  name: nekazari-config
-                  key: POSTGRES_USER
-            - name: SETTING_DATABASES__default__PASSWORD
+            # docker-zulip defaults: user=zulip, db=zulip
+            # We created role "zulip" and db "zulip" in PostgreSQL
+            - name: DB_HOST
+              value: "postgresql-service"
+            - name: DB_HOST_PORT
+              value: "5432"
+            - name: SECRETS_postgres_password
               valueFrom:
                 secretKeyRef:
                   name: postgresql-secret
                   key: password
-            - name: SETTING_DATABASES__default__HOST
-              value: "postgresql-service"
-            - name: SETTING_DATABASES__default__PORT
-              value: "5432"
 
             # --- Redis (reuse NKZ Redis, DB index 3) ---
             - name: SETTING_REDIS_HOST
               value: "redis-service"
             - name: SETTING_REDIS_PORT
               value: "6379"
+            - name: SECRETS_redis_password
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: password
 
             # --- RabbitMQ (dedicated in-cluster) ---
             - name: SETTING_RABBITMQ_HOST
@@ -109,7 +109,7 @@ spec:
                 secretKeyRef:
                   name: zulip-secret
                   key: rabbitmq-user
-            - name: SETTING_RABBITMQ_PASSWORD
+            - name: SECRETS_rabbitmq_password
               valueFrom:
                 secretKeyRef:
                   name: zulip-secret
@@ -119,10 +119,9 @@ spec:
             - name: SETTING_MEMCACHED_LOCATION
               value: "zulip-memcached-service:11211"
 
-            # --- OIDC (Keycloak) ---
-            - name: SETTING_SOCIAL_AUTH_OIDC_ENABLED_IDPS
-              value: >-
-                {"keycloak": {"display_name": "NKZ Login", "display_icon": null, "oidc_url": "https://YOUR_KEYCLOAK_HOST/auth/realms/nekazari", "client_id": "zulip", "secret": "PLACEHOLDER", "auto_signup": true}}
+            # --- OIDC (Keycloak) — disabled for PoC, enable in Fase 2 ---
+            # SETTING_SOCIAL_AUTH_OIDC_ENABLED_IDPS requires Python dict syntax
+            # Configure after Keycloak client is created (ZULIP-4)
 
             # --- Email (disabled for PoC) ---
             - name: SETTING_EMAIL_HOST
@@ -139,13 +138,16 @@ spec:
               memory: "512Mi"
               cpu: "25m"
             limits:
-              memory: "2Gi"
+              memory: "3Gi"
               cpu: "1500m"
           livenessProbe:
             httpGet:
               path: /api/v1/server_settings
               port: 80
-            initialDelaySeconds: 120
+              httpHeaders:
+                - name: Host
+                  value: localhost
+            initialDelaySeconds: 300
             periodSeconds: 30
             timeoutSeconds: 10
             failureThreshold: 5
@@ -153,9 +155,12 @@ spec:
             httpGet:
               path: /api/v1/server_settings
               port: 80
-            initialDelaySeconds: 60
+              httpHeaders:
+                - name: Host
+                  value: localhost
+            initialDelaySeconds: 120
             periodSeconds: 15
-            timeoutSeconds: 5
+            timeoutSeconds: 10
           volumeMounts:
             - name: zulip-data
               mountPath: /data

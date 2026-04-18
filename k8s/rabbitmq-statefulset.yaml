@@ -39,7 +39,7 @@ spec:
                   name: zulip-secret
                   key: rabbitmq-password
             - name: RABBITMQ_DEFAULT_VHOST
-              value: "zulip"
+              value: "/"
           resources:
             requests:
               memory: "128Mi"
