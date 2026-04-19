@@ -1,5 +1,5 @@
 import './i18n';
-import ZulipEmbed from './App';
+import CommunicationsHub from './App';
 import pkg from '../package.json';
 
 const MODULE_ID = 'zulip';
@@ -7,7 +7,7 @@ const MODULE_ID = 'zulip';
 if (typeof window !== 'undefined' && window.__NKZ__) {
   window.__NKZ__.register({
     id: MODULE_ID,
-    main: ZulipEmbed,
+    main: CommunicationsHub,
     version: pkg.version,
   });
 }
