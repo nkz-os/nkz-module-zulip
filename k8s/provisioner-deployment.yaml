@@ -25,37 +25,20 @@ spec:
             - containerPort: 5000
               name: http
           env:
-            - name: KEYCLOAK_URL
-              value: "http://keycloak-service:8080/auth"
-            - name: KEYCLOAK_REALM
-              value: "nekazari"
-            - name: KEYCLOAK_ADMIN_USER
-              valueFrom:
-                secretKeyRef:
-                  name: keycloak-secret
-                  key: admin-user
-            - name: KEYCLOAK_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: keycloak-secret
-                  key: admin-password
             - name: ZULIP_URL
               value: "http://zulip-service"
-            - name: ZULIP_ADMIN_EMAIL
-              valueFrom:
-                configMapKeyRef:
-                  name: zulip-config
-                  key: admin-email
-            - name: ZULIP_ADMIN_API_KEY
+            - name: ZULIP_BOT_EMAIL
               valueFrom:
                 secretKeyRef:
                   name: zulip-secret
-                  key: admin-api-key
-            - name: ZULIP_EXTERNAL_HOST
+                  key: bot-email
+            - name: ZULIP_BOT_API_KEY
               valueFrom:
-                configMapKeyRef:
-                  name: zulip-config
-                  key: external-host
+                secretKeyRef:
+                  name: zulip-secret
+                  key: bot-api-key
+            - name: POSTGRES_URL
+              value: "postgresql://zulip_provisioner:@postgresql-service:5432/nekazari"
             - name: REDIS_URL
               value: "redis://redis-service:6379/4"
           resources:

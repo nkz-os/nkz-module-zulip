@@ -1,6 +1,8 @@
-"""Zulip Admin API client for realm and stream provisioning."""
+"""Zulip API client for tenant stream provisioning."""
 
+import json
 import logging
+from typing import Optional
 
 import requests
 
@@ -10,92 +12,16 @@ logger = logging.getLogger(__name__)
 
 
 class ZulipClient:
-    """Manages Zulip realms and streams for tenant provisioning."""
+    """Manages streams and users in a single Zulip organization."""
 
     def __init__(self):
         self.base_url = Config.ZULIP_URL
-        self.admin_email = Config.ZULIP_ADMIN_EMAIL
-        self.admin_api_key = Config.ZULIP_ADMIN_API_KEY
+        self.bot_email = Config.ZULIP_BOT_EMAIL
+        self.bot_api_key = Config.ZULIP_BOT_API_KEY
 
     @property
     def _auth(self):
-        return (self.admin_email, self.admin_api_key)
-
-    def create_realm(self, tenant_id: str, tenant_name: str) -> dict:
-        """Create a new Zulip realm (organization) for a tenant.
-
-        Note: Zulip's realm creation via API requires server-level admin.
-        In docker-zulip, this is done via manage.py or the API with
-        appropriate permissions.
-        """
-        resp = requests.post(
-            f"{self.base_url}/api/v1/realm",
-            auth=self._auth,
-            json={
-                "name": tenant_name,
-                "string_id": tenant_id,
-            },
-            timeout=30,
-        )
-        resp.raise_for_status()
-        result = resp.json()
-        logger.info("Created Zulip realm: %s (%s)", tenant_name, tenant_id)
-        return result
-
-    def create_default_streams(self, tenant_id: str) -> list:
-        """Create the default set of streams for a tenant realm."""
-        created = []
-        for stream_def in Config.DEFAULT_STREAMS:
-            try:
-                resp = requests.post(
-                    f"{self.base_url}/api/v1/users/me/subscriptions",
-                    auth=self._auth,
-                    json={
-                        "subscriptions": [
-                            {
-                                "name": stream_def["name"],
-                                "description": stream_def["description"],
-                            }
-                        ],
-                    },
-                    timeout=15,
-                )
-                resp.raise_for_status()
-                created.append(stream_def["name"])
-                logger.info(
-                    "Created stream #%s in realm %s",
-                    stream_def["name"],
-                    tenant_id,
-                )
-            except requests.RequestException:
-                logger.exception(
-                    "Failed to create stream #%s in realm %s",
-                    stream_def["name"],
-                    tenant_id,
-                )
-        return created
-
-    def post_message(
-        self, stream: str, topic: str, content: str, realm: str = None
-    ) -> dict:
-        """Post a message to a Zulip stream/topic.
-
-        Used by connectors to deliver alerts and notifications.
-        """
-        payload = {
-            "type": "stream",
-            "to": stream,
-            "topic": topic,
-            "content": content,
-        }
-        resp = requests.post(
-            f"{self.base_url}/api/v1/messages",
-            auth=self._auth,
-            json=payload,
-            timeout=10,
-        )
-        resp.raise_for_status()
-        return resp.json()
+        return (self.bot_email, self.bot_api_key)
 
     def health_check(self) -> bool:
         """Check if Zulip server is reachable."""
@@ -107,3 +33,138 @@ class ZulipClient:
             return resp.status_code == 200
         except requests.RequestException:
             return False
+
+    def create_stream(
+        self, name: str, description: str, invite_only: bool = True
+    ) -> bool:
+        """Create a stream by subscribing the bot to it.
+
+        Zulip creates streams implicitly when a user subscribes to a
+        non-existent stream name.  Uses form-encoded data (not JSON).
+        """
+        subscriptions = json.dumps(
+            [{"name": name, "description": description}]
+        )
+        resp = requests.post(
+            f"{self.base_url}/api/v1/users/me/subscriptions",
+            auth=self._auth,
+            data={
+                "subscriptions": subscriptions,
+                "invite_only": json.dumps(invite_only),
+            },
+            timeout=15,
+        )
+        if resp.status_code == 200:
+            logger.info("Created stream #%s", name)
+            return True
+        logger.error(
+            "Failed to create stream #%s: %s %s",
+            name,
+            resp.status_code,
+            resp.text,
+        )
+        return False
+
+    def get_stream_id(self, name: str) -> Optional[int]:
+        """Get the numeric ID of a stream by name."""
+        resp = requests.get(
+            f"{self.base_url}/api/v1/get_stream_id",
+            auth=self._auth,
+            params={"stream": name},
+            timeout=10,
+        )
+        if resp.status_code == 200:
+            return resp.json().get("stream_id")
+        return None
+
+    def subscribe_user(self, user_email: str, stream_name: str) -> bool:
+        """Subscribe a user to a stream (form-encoded)."""
+        subscriptions = json.dumps([{"name": stream_name}])
+        resp = requests.post(
+            f"{self.base_url}/api/v1/users/me/subscriptions",
+            auth=self._auth,
+            data={
+                "subscriptions": subscriptions,
+                "principals": json.dumps([user_email]),
+            },
+            timeout=15,
+        )
+        if resp.status_code == 200:
+            logger.info("Subscribed %s to #%s", user_email, stream_name)
+            return True
+        logger.error(
+            "Failed to subscribe %s to #%s: %s %s",
+            user_email,
+            stream_name,
+            resp.status_code,
+            resp.text,
+        )
+        return False
+
+    def unsubscribe_user(self, user_email: str, stream_name: str) -> bool:
+        """Remove a user from a stream (form-encoded)."""
+        resp = requests.delete(
+            f"{self.base_url}/api/v1/users/me/subscriptions",
+            auth=self._auth,
+            data={
+                "subscriptions": json.dumps([stream_name]),
+                "principals": json.dumps([user_email]),
+            },
+            timeout=15,
+        )
+        if resp.status_code == 200:
+            logger.info("Unsubscribed %s from #%s", user_email, stream_name)
+            return True
+        logger.error(
+            "Failed to unsubscribe %s from #%s: %s %s",
+            user_email,
+            stream_name,
+            resp.status_code,
+            resp.text,
+        )
+        return False
+
+    def archive_stream(self, stream_id: int) -> bool:
+        """Archive (deactivate) a stream by its numeric ID."""
+        resp = requests.delete(
+            f"{self.base_url}/api/v1/streams/{stream_id}",
+            auth=self._auth,
+            timeout=10,
+        )
+        if resp.status_code == 200:
+            logger.info("Archived stream id=%d", stream_id)
+            return True
+        logger.error(
+            "Failed to archive stream id=%d: %s %s",
+            stream_id,
+            resp.status_code,
+            resp.text,
+        )
+        return False
+
+    def post_message(self, stream: str, topic: str, content: str) -> dict:
+        """Post a message to a Zulip stream/topic."""
+        resp = requests.post(
+            f"{self.base_url}/api/v1/messages",
+            auth=self._auth,
+            data={
+                "type": "stream",
+                "to": stream,
+                "topic": topic,
+                "content": content,
+            },
+            timeout=10,
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+    def get_user_by_email(self, email: str) -> Optional[dict]:
+        """Look up a Zulip user by email address."""
+        resp = requests.get(
+            f"{self.base_url}/api/v1/users/{email}",
+            auth=self._auth,
+            timeout=10,
+        )
+        if resp.status_code == 200:
+            return resp.json().get("user")
+        return None
