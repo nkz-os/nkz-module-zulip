@@ -70,7 +70,9 @@ spec:
                   name: zulip-config
                   key: admin-email
             - name: ZULIP_AUTH_BACKENDS
-              value: "EmailAuthBackend,GenericOpenIdConnectBackend"
+              value: "EmailAuthBackend"
+            # To enable OIDC, change to: "EmailAuthBackend,GenericOpenIdConnectBackend"
+            # Requires: zulip-secret.oidc-client-secret (run scripts/keycloak-create-zulip-client.sh first)
             - name: SETTING_SECRET_KEY
               valueFrom:
                 secretKeyRef:
@@ -119,18 +121,22 @@ spec:
             - name: SETTING_MEMCACHED_LOCATION
               value: "zulip-memcached-service:11211"
 
-            # --- OIDC (Keycloak) ---
-            # Value is Python dict literal (docker-zulip writes it verbatim to settings.py)
-            - name: SETTING_SOCIAL_AUTH_OIDC_ENABLED_IDPS
-              value: >-
-                {"keycloak": {"oidc_url": "https://auth.robotika.cloud/auth/realms/nekazari", "display_name": "Nekazari SSO", "display_icon": None, "client_id": "zulip", "secret": get_secret("social_auth_oidc_secret"), "auto_signup": True}}
-            - name: SETTING_SOCIAL_AUTH_OIDC_FULL_NAME_VALIDATED
-              value: "True"
-            - name: SECRETS_social_auth_oidc_secret
-              valueFrom:
-                secretKeyRef:
-                  name: zulip-secret
-                  key: oidc-client-secret
+            # --- OIDC (Keycloak) — DISABLED until oidc-client-secret exists ---
+            # To enable: uncomment below + change ZULIP_AUTH_BACKENDS above
+            # Run scripts/keycloak-create-zulip-client.sh first, then:
+            #   kubectl patch secret zulip-secret -n nekazari --type merge \
+            #     -p '{"data":{"oidc-client-secret":"<base64-encoded-secret>"}}'
+            #
+            # - name: SETTING_SOCIAL_AUTH_OIDC_ENABLED_IDPS
+            #   value: >-
+            #     {"keycloak": {"oidc_url": "https://auth.robotika.cloud/auth/realms/nekazari", "display_name": "Nekazari SSO", "display_icon": None, "client_id": "zulip", "secret": get_secret("social_auth_oidc_secret"), "auto_signup": True}}
+            # - name: SETTING_SOCIAL_AUTH_OIDC_FULL_NAME_VALIDATED
+            #   value: "True"
+            # - name: SECRETS_social_auth_oidc_secret
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: zulip-secret
+            #       key: oidc-client-secret
 
             # --- Email (disabled for PoC) ---
             - name: SETTING_EMAIL_HOST
