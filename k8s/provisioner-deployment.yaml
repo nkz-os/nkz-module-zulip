@@ -7,7 +7,7 @@ metadata:
     app: zulip
     component: provisioner
 spec:
-  replicas: 1
+  replicas: 0  # Image not built yet — scale up after ghcr.io/nkz-os/nkz-module-zulip/provisioner:latest is pushed
   selector:
     matchLabels:
       app: zulip
