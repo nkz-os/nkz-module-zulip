@@ -18,6 +18,9 @@ class ZulipClient:
         self.base_url = Config.ZULIP_URL
         self.bot_email = Config.ZULIP_BOT_EMAIL
         self.bot_api_key = Config.ZULIP_BOT_API_KEY
+        self._session = requests.Session()
+        self._session.auth = (self.bot_email, self.bot_api_key)
+        self._session.headers["Host"] = Config.ZULIP_HOST
 
     @property
     def _auth(self):
@@ -26,7 +29,7 @@ class ZulipClient:
     def health_check(self) -> bool:
         """Check if Zulip server is reachable."""
         try:
-            resp = requests.get(
+            resp = self._session.get(
                 f"{self.base_url}/api/v1/server_settings",
                 timeout=5,
             )
@@ -45,9 +48,8 @@ class ZulipClient:
         subscriptions = json.dumps(
             [{"name": name, "description": description}]
         )
-        resp = requests.post(
+        resp = self._session.post(
             f"{self.base_url}/api/v1/users/me/subscriptions",
-            auth=self._auth,
             data={
                 "subscriptions": subscriptions,
                 "invite_only": json.dumps(invite_only),
@@ -67,9 +69,8 @@ class ZulipClient:
 
     def get_stream_id(self, name: str) -> Optional[int]:
         """Get the numeric ID of a stream by name."""
-        resp = requests.get(
+        resp = self._session.get(
             f"{self.base_url}/api/v1/get_stream_id",
-            auth=self._auth,
             params={"stream": name},
             timeout=10,
         )
@@ -80,9 +81,8 @@ class ZulipClient:
     def subscribe_user(self, user_email: str, stream_name: str) -> bool:
         """Subscribe a user to a stream (form-encoded)."""
         subscriptions = json.dumps([{"name": stream_name}])
-        resp = requests.post(
+        resp = self._session.post(
             f"{self.base_url}/api/v1/users/me/subscriptions",
-            auth=self._auth,
             data={
                 "subscriptions": subscriptions,
                 "principals": json.dumps([user_email]),
@@ -103,9 +103,8 @@ class ZulipClient:
 
     def unsubscribe_user(self, user_email: str, stream_name: str) -> bool:
         """Remove a user from a stream (form-encoded)."""
-        resp = requests.delete(
+        resp = self._session.delete(
             f"{self.base_url}/api/v1/users/me/subscriptions",
-            auth=self._auth,
             data={
                 "subscriptions": json.dumps([stream_name]),
                 "principals": json.dumps([user_email]),
@@ -126,9 +125,8 @@ class ZulipClient:
 
     def archive_stream(self, stream_id: int) -> bool:
         """Archive (deactivate) a stream by its numeric ID."""
-        resp = requests.delete(
+        resp = self._session.delete(
             f"{self.base_url}/api/v1/streams/{stream_id}",
-            auth=self._auth,
             timeout=10,
         )
         if resp.status_code == 200:
@@ -144,9 +142,8 @@ class ZulipClient:
 
     def post_message(self, stream: str, topic: str, content: str) -> dict:
         """Post a message to a Zulip stream/topic."""
-        resp = requests.post(
+        resp = self._session.post(
             f"{self.base_url}/api/v1/messages",
-            auth=self._auth,
             data={
                 "type": "stream",
                 "to": stream,
@@ -160,9 +157,8 @@ class ZulipClient:
 
     def get_user_by_email(self, email: str) -> Optional[dict]:
         """Look up a Zulip user by email address."""
-        resp = requests.get(
+        resp = self._session.get(
             f"{self.base_url}/api/v1/users/{email}",
-            auth=self._auth,
             timeout=10,
         )
         if resp.status_code == 200:

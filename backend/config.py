@@ -3,6 +3,7 @@ import os
 
 class Config:
     ZULIP_URL = os.environ.get("ZULIP_URL", "http://zulip-service")
+    ZULIP_HOST = os.environ.get("ZULIP_HOST", "messaging.robotika.cloud")
     ZULIP_BOT_EMAIL = os.environ.get("ZULIP_BOT_EMAIL", "")
     ZULIP_BOT_API_KEY = os.environ.get("ZULIP_BOT_API_KEY", "")
     POSTGRES_URL = os.environ.get(
