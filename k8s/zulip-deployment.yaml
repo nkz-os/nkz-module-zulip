@@ -122,7 +122,7 @@ spec:
             # --- OIDC (Keycloak) ---
             - name: SETTING_SOCIAL_AUTH_OIDC_ENABLED_IDPS
               value: >-
-                {"keycloak": {"oidc_url": "https://auth.robotika.cloud/auth/realms/nekazari", "display_name": "Nekazari SSO", "display_icon": null, "client_id": "zulip", "secret": get_secret("social_auth_oidc_secret"), "auto_signup": true}}
+                {"keycloak": {"oidc_url": "https://auth.robotika.cloud/auth/realms/nekazari", "display_name": "Nekazari SSO", "display_icon": None, "client_id": "zulip", "secret": get_secret("social_auth_oidc_secret"), "auto_signup": True}}
             - name: SETTING_SOCIAL_AUTH_OIDC_FULL_NAME_VALIDATED
               value: "True"
             - name: SECRETS_social_auth_oidc_secret
