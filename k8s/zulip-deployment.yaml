@@ -191,10 +191,16 @@ spec:
           volumeMounts:
             - name: zulip-data
               mountPath: /data
+            - name: zulip-uwsgi-config
+              mountPath: /etc/zulip/uwsgi.ini
+              subPath: uwsgi.ini
       volumes:
         - name: zulip-data
           persistentVolumeClaim:
             claimName: zulip-data-pvc
+        - name: zulip-uwsgi-config
+          configMap:
+            name: zulip-uwsgi-config
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
