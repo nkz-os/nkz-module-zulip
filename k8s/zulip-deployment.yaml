@@ -53,11 +53,6 @@ spec:
               name: http
             - containerPort: 443
               name: https
-          securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-                - ALL
           env:
             # --- Disable internal SSL (TLS terminates at Traefik) ---
             - name: SSL_CERTIFICATE_GENERATION
