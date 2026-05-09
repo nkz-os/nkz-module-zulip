@@ -54,8 +54,8 @@ spec:
                 - -q
                 - ping
             initialDelaySeconds: 30
-            periodSeconds: 20
-            timeoutSeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 15
           readinessProbe:
             exec:
               command:
@@ -63,8 +63,8 @@ spec:
                 - -q
                 - check_running
             initialDelaySeconds: 15
-            periodSeconds: 10
-            timeoutSeconds: 5
+            periodSeconds: 20
+            timeoutSeconds: 10
           volumeMounts:
             - name: rabbitmq-data
               mountPath: /var/lib/rabbitmq

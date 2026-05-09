@@ -44,8 +44,13 @@ spec:
                   key: password
             - name: POSTGRES_URL
               value: "postgresql://postgres:$(POSTGRES_PASSWORD)@postgresql-service:5432/nekazari"
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: password
             - name: REDIS_URL
-              value: "redis://redis-service:6379/4"
+              value: "redis://:$(REDIS_PASSWORD)@redis-service:6379/4"
           resources:
             requests:
               memory: "64Mi"

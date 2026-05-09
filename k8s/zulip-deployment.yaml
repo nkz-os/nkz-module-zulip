@@ -20,6 +20,8 @@ spec:
         app: zulip
         component: server
     spec:
+      securityContext:
+        runAsNonRoot: false
       initContainers:
         - name: wait-for-deps
           image: busybox:1.36
@@ -51,6 +53,11 @@ spec:
               name: http
             - containerPort: 443
               name: https
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           env:
             # --- Disable internal SSL (TLS terminates at Traefik) ---
             - name: SSL_CERTIFICATE_GENERATION
@@ -147,13 +154,23 @@ spec:
             - name: SETTING_TORNADO_PROCESSES
               value: "1"
 
+            # --- Worker reduction: force explicit caps (auto-scaler sees host RAM, not container limit) ---
+            - name: CONFIG_application_server__uwsgi_processes
+              value: "4"
+            - name: CONFIG_application_server__queue_workers_multiprocess
+              value: "false"
+            - name: CONFIG_application_server__nginx_worker_processes
+              value: "1"
+            - name: CONFIG_application_server__katex_server
+              value: "false"
+
           resources:
             requests:
-              memory: "512Mi"
-              cpu: "25m"
+              memory: "2Gi"
+              cpu: "100m"
             limits:
-              memory: "3Gi"
-              cpu: "1500m"
+              memory: "6Gi"
+              cpu: "2000m"
           livenessProbe:
             httpGet:
               path: /api/v1/server_settings
@@ -163,8 +180,8 @@ spec:
                   value: localhost
             initialDelaySeconds: 300
             periodSeconds: 30
-            timeoutSeconds: 10
-            failureThreshold: 5
+            timeoutSeconds: 15
+            failureThreshold: 6
           readinessProbe:
             httpGet:
               path: /api/v1/server_settings
@@ -174,7 +191,8 @@ spec:
                   value: localhost
             initialDelaySeconds: 120
             periodSeconds: 15
-            timeoutSeconds: 10
+            timeoutSeconds: 15
+            failureThreshold: 5
           volumeMounts:
             - name: zulip-data
               mountPath: /data
