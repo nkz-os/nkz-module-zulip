@@ -1,3 +1,4 @@
+import { defineModule } from "@nekazari/module-kit";
 import './i18n';
 import CommunicationsHub from './App';
 import pkg from '../package.json';
