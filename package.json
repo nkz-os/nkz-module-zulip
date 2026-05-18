@@ -19,7 +19,7 @@
     "lucide-react": "^0.424.0"
   },
   "devDependencies": {
-    "@nekazari/module-builder": "^2.0.0",
+    "@nekazari/module-builder": "^2.0.3",
     "@nekazari/module-kit": "^0.6.0",
     "@nekazari/sdk": "^1.0.0",
     "@nekazari/ui-kit": "^1.0.0",
