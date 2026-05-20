@@ -124,7 +124,7 @@ spec:
             # --- OIDC (Keycloak) ---
             - name: SETTING_SOCIAL_AUTH_OIDC_ENABLED_IDPS
               value: >-
-                {"keycloak": {"oidc_url": "https://auth.robotika.cloud/auth/realms/nekazari", "display_name": "Nekazari SSO", "display_icon": None, "client_id": "zulip", "secret": get_secret("social_auth_oidc_secret"), "auto_signup": True}}
+                {"keycloak": {"oidc_url": "https://YOUR_KEYCLOAK_DOMAIN/auth/realms/YOUR_REALM", "display_name": "Nekazari SSO", "display_icon": None, "client_id": "zulip", "secret": get_secret("social_auth_oidc_secret"), "auto_signup": True}}
             - name: SETTING_SOCIAL_AUTH_OIDC_FULL_NAME_VALIDATED
               value: "True"
             - name: SECRETS_social_auth_oidc_secret
@@ -137,7 +137,7 @@ spec:
             - name: SETTING_EMAIL_HOST
               value: ""
             - name: SETTING_NOREPLY_EMAIL_ADDRESS
-              value: "noreply@robotika.cloud"
+              value: "noreply@example.com"
 
             # --- Reverse proxy (Traefik) ---
             - name: SETTING_USE_X_FORWARDED_HOST

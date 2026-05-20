@@ -36,7 +36,7 @@ INSERT INTO marketplace_modules (
         "shortDescription": "Team messaging and IoT alerts",
         "features": ["Stream/topic messaging", "Webhook integrations", "Full-text search", "IoT alert channels"],
         "backend_service": "zulip",
-        "externalUrl": "https://messaging.robotika.cloud"
+        "externalUrl": "https://YOUR_DOMAIN"
     }'::jsonb
 ) ON CONFLICT (id) DO UPDATE SET
     display_name = EXCLUDED.display_name,
