@@ -39,20 +39,22 @@ spec:
                   key: rabbitmq-password
             - name: RABBITMQ_DEFAULT_VHOST
               value: "/"
+            - name: RABBITMQ_SERVER_ADDITIONAL_ERL_ARGS
+              value: "+S 2:2"
           resources:
             requests:
               memory: "128Mi"
-              cpu: "10m"
+              cpu: "100m"
             limits:
               memory: "1Gi"
-              cpu: "500m"
+              cpu: "2000m"
           startupProbe:
             tcpSocket:
               port: 5672
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 10
+            failureThreshold: 20
           livenessProbe:
             tcpSocket:
               port: 5672
