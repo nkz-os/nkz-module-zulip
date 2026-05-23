@@ -40,12 +40,14 @@ spec:
                   key: rabbitmq-password
             - name: RABBITMQ_DEFAULT_VHOST
               value: "/"
+            - name: RABBITMQ_VM_MEMORY_HIGH_WATERMARK
+              value: "0.6"
           resources:
             requests:
               memory: "128Mi"
               cpu: "10m"
             limits:
-              memory: "512Mi"
+              memory: "1Gi"
               cpu: "500m"
           livenessProbe:
             exec:
