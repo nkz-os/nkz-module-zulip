@@ -47,16 +47,22 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "500m"
-          livenessProbe:
+          startupProbe:
             tcpSocket:
               port: 5672
             initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            tcpSocket:
+              port: 5672
             periodSeconds: 30
             timeoutSeconds: 5
           readinessProbe:
             tcpSocket:
               port: 5672
-            initialDelaySeconds: 30
+            initialDelaySeconds: 10
             periodSeconds: 20
             timeoutSeconds: 5
           volumeMounts:
