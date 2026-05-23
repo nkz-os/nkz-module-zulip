@@ -19,6 +19,22 @@ spec:
         app: zulip
         component: rabbitmq
     spec:
+      initContainers:
+        - name: reset-corrupt-mnesia
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              if [ -f /data/mnesia/*/schema.DAT ]; then
+                echo "Mnesia schema found, keeping data"
+              else
+                echo "No Mnesia schema, cleaning corrupt data"
+                rm -rf /data/mnesia/*
+              fi
+          volumeMounts:
+            - name: rabbitmq-data
+              mountPath: /data
       containers:
         - name: rabbitmq
           image: rabbitmq:3.12-management
