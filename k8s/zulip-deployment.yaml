@@ -166,6 +166,17 @@ spec:
             limits:
               memory: "6Gi"
               cpu: "2000m"
+          startupProbe:
+            httpGet:
+              path: /api/v1/server_settings
+              port: 80
+              httpHeaders:
+                - name: Host
+                  value: localhost
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 15
+            failureThreshold: 60
           livenessProbe:
             httpGet:
               path: /api/v1/server_settings
@@ -173,7 +184,7 @@ spec:
               httpHeaders:
                 - name: Host
                   value: localhost
-            initialDelaySeconds: 300
+            initialDelaySeconds: 30
             periodSeconds: 30
             timeoutSeconds: 15
             failureThreshold: 6
@@ -184,7 +195,7 @@ spec:
               httpHeaders:
                 - name: Host
                   value: localhost
-            initialDelaySeconds: 120
+            initialDelaySeconds: 10
             periodSeconds: 15
             timeoutSeconds: 15
             failureThreshold: 5
