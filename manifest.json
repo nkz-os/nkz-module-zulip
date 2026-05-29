@@ -4,6 +4,14 @@
   "display_name": "Communications (Zulip)",
   "version": "0.1.0",
   "description": "Sovereign messaging platform with IoT alert integration for team collaboration.",
+  "description_i18n": {
+    "es": "Plataforma de mensajería soberana con integración de alertas IoT para colaboración en equipo.",
+    "en": "Sovereign messaging platform with IoT alert integration for team collaboration.",
+    "eu": "Mezu plataforma subiranoa IoT alerten integrazioarekin talde-lankidetzarako.",
+    "fr": "Plateforme de messagerie souveraine avec intégration d'alertes IoT pour la collaboration d'équipe.",
+    "pt": "Plataforma de mensagens soberana com integração de alertas IoT para colaboração em equipe.",
+    "ca": "Plataforma de missatgeria sobirana amb integració d'alertes IoT per a col·laboració en equip."
+  },
   "short_description": "Team Messaging & Alerts",
   "icon": "message-circle",
   "author": {
