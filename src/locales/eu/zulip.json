@@ -2,6 +2,7 @@
   "title": "Communications",
   "loading": "Loading...",
   "connectionError": "Could not connect to communications server",
+  "loadingFailed": "Errorea mezuak kargatzean",
   "retry": "Retry",
   "noMessages": "No messages yet",
   "poweredBy": "Powered by Zulip",

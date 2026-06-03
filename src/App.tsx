@@ -30,7 +30,7 @@ const CommunicationsHub: React.FC = () => {
         setStreams(data.streams);
         setLoading(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load');
+        setError(err instanceof Error ? err.message : t('loadingFailed'));
         setLoading(false);
       }
     })();
