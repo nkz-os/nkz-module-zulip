@@ -44,7 +44,7 @@ const DirectMessagesPanel: React.FC<Props> = ({ dmUnreads, newMessages }) => {
                 peerId: r.id,
                 peerEmail: r.email,
                 peerName: r.full_name,
-                avatarUrl: msg.avatar_url,
+                avatarUrl: '',
                 unreadCount: unread?.unread_message_ids.length || 0,
               });
             }
@@ -136,11 +136,17 @@ const DirectMessagesPanel: React.FC<Props> = ({ dmUnreads, newMessages }) => {
                   }
                   className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-100 dark:border-slate-800"
                 >
-                  <img
-                    src={conv.avatarUrl}
-                    alt=""
-                    className="w-7 h-7 rounded-full flex-shrink-0"
-                  />
+                  {conv.avatarUrl ? (
+                    <img
+                      src={conv.avatarUrl}
+                      alt=""
+                      className="w-7 h-7 rounded-full flex-shrink-0"
+                    />
+                  ) : (
+                    <span className="w-7 h-7 rounded-full flex-shrink-0 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-medium flex items-center justify-center">
+                      {conv.peerName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
                   <span className="text-sm text-slate-700 dark:text-slate-300 truncate flex-1 text-left">
                     {conv.peerName}
                   </span>
