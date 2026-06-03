@@ -14,6 +14,7 @@ Endpoints:
 import json
 import logging
 import os
+from functools import wraps
 
 import psycopg2
 from flask import Flask, jsonify, request
@@ -55,6 +56,43 @@ def _get_stream_templates():
 def _stream_name(tenant_id: str, suffix: str) -> str:
     """Build a canonical stream name for a tenant."""
     return f"tenant-{tenant_id}-{suffix}"
+
+
+def require_auth(roles=None):
+    """Decorator that validates api-gateway injected auth headers.
+
+    Checks presence of X-Tenant-ID and optionally X-User-Roles.
+    Does NOT validate JWTs — that's the api-gateway's responsibility.
+    """
+    if roles is None:
+        roles = []
+
+    def decorator(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            tenant_id = request.headers.get("X-Tenant-ID")
+            if not tenant_id:
+                return jsonify({"error": "Missing X-Tenant-ID header"}), 401
+
+            if roles:
+                user_roles = request.headers.get("X-User-Roles", "")
+                user_role_list = [
+                    r.strip() for r in user_roles.split(",") if r.strip()
+                ]
+                if not any(r in user_role_list for r in roles):
+                    return jsonify({"error": "Insufficient permissions"}), 403
+
+            return f(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
+def validate_tenant_match(body_tenant_id: str) -> bool:
+    """Check that the tenant_id in the request body matches the header."""
+    header_tenant = request.headers.get("X-Tenant-ID", "")
+    return body_tenant_id == header_tenant
 
 
 def create_app():
@@ -106,6 +144,7 @@ def create_app():
     # ------------------------------------------------------------------
 
     @app.route("/api/provisioning/tenant", methods=["POST"])
+    @require_auth(roles=["admin"])
     def provision_tenant():
         """Create private streams for a new tenant.
 
@@ -116,6 +155,9 @@ def create_app():
             return jsonify({"error": "JSON body required"}), 400
 
         tenant_id = data.get("tenant_id")
+        if not validate_tenant_match(tenant_id):
+            return jsonify({"error": "tenant_id does not match X-Tenant-ID"}), 403
+
         tenant_name = data.get("tenant_name")
         if not tenant_id or not tenant_name:
             return jsonify({"error": "tenant_id and tenant_name required"}), 400
@@ -141,8 +183,11 @@ def create_app():
         }), status_code
 
     @app.route("/api/provisioning/tenant/<tenant_id>", methods=["DELETE"])
+    @require_auth(roles=["admin"])
     def deprovision_tenant(tenant_id: str):
         """Archive all streams belonging to a tenant."""
+        if not validate_tenant_match(tenant_id):
+            return jsonify({"error": "tenant_id does not match X-Tenant-ID"}), 403
         templates = _get_stream_templates()
         archived = []
         errors = []
@@ -169,11 +214,15 @@ def create_app():
     # ------------------------------------------------------------------
 
     @app.route("/api/provisioning/tenant/<tenant_id>/user", methods=["POST"])
+    @require_auth(roles=["admin"])
     def subscribe_user(tenant_id: str):
         """Subscribe a user to all tenant streams.
 
         Body: {"email": "user@example.com"}
         """
+        if not validate_tenant_match(tenant_id):
+            return jsonify({"error": "tenant_id does not match X-Tenant-ID"}), 403
+
         data = request.get_json()
         if not data or not data.get("email"):
             return jsonify({"error": "email required"}), 400
@@ -190,6 +239,12 @@ def create_app():
             else:
                 errors.append(name)
 
+        # Also subscribe to global forum
+        if zulip.subscribe_user(email, "general-forum"):
+            subscribed.append("general-forum")
+        else:
+            errors.append("general-forum")
+
         return jsonify({
             "email": email,
             "streams_subscribed": subscribed,
@@ -200,8 +255,11 @@ def create_app():
         "/api/provisioning/tenant/<tenant_id>/user/<path:email>",
         methods=["DELETE"],
     )
+    @require_auth(roles=["admin"])
     def unsubscribe_user(tenant_id: str, email: str):
         """Unsubscribe a user from all tenant streams."""
+        if not validate_tenant_match(tenant_id):
+            return jsonify({"error": "tenant_id does not match X-Tenant-ID"}), 403
         templates = _get_stream_templates()
         unsubscribed = []
         errors = []
@@ -224,6 +282,7 @@ def create_app():
     # ------------------------------------------------------------------
 
     @app.route("/api/provisioning/sync", methods=["POST"])
+    @require_auth(roles=["admin"])
     def sync_tenants():
         """Reconcile stream state for a list of tenants.
 
@@ -270,6 +329,7 @@ def create_app():
     # ------------------------------------------------------------------
 
     @app.route("/api/provisioning/announce", methods=["POST"])
+    @require_auth(roles=["platform_admin"])
     def announce():
         """Post a message to #platform-announcements.
 
