@@ -1,0 +1,24 @@
+name: Publish Frontend Module
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'vite.config.ts'
+      - 'tsconfig.json'
+      - '.github/workflows/publish-frontend.yml'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    permissions:
+      id-token: write
+      contents: read
+    uses: nkz-os/nkz/.github/workflows/_publish-module.yml@main
+    with:
+      module_id: zulip
+    secrets:
+      INTERNAL_SERVICE_SECRET: ${{ secrets.INTERNAL_SERVICE_SECRET }}
