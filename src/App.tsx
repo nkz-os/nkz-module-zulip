@@ -10,6 +10,7 @@ import AlertsPanel from './components/AlertsPanel';
 import StreamsPanel from './components/StreamsPanel';
 import DirectMessagesPanel from './components/DirectMessagesPanel';
 import AnnouncementsPanel from './components/AnnouncementsPanel';
+import ForumPanel from './components/ForumPanel';
 
 const CommunicationsHub: React.FC = () => {
   const { t } = useTranslation('zulip');
@@ -57,6 +58,7 @@ const CommunicationsHub: React.FC = () => {
 
   const alertsStream = streams.find((s) => s.name.endsWith('-alerts')) || null;
   const announcementsStream = streams.find((s) => s.name === 'platform-announcements') || null;
+  const forumStream = streams.find((s) => s.name === 'general-forum') || null;
 
   const alertMessages = newMessages.filter(
     (m) => m.type === 'stream' && alertsStream && m.stream_id === alertsStream.stream_id
@@ -68,7 +70,8 @@ const CommunicationsHub: React.FC = () => {
     (m) =>
       m.type === 'stream' &&
       (!alertsStream || m.stream_id !== alertsStream.stream_id) &&
-      (!announcementsStream || m.stream_id !== announcementsStream.stream_id)
+      (!announcementsStream || m.stream_id !== announcementsStream.stream_id) &&
+      (!forumStream || m.stream_id !== forumStream.stream_id)
   );
   const dmMessages = newMessages.filter((m) => m.type === 'private');
 
@@ -123,6 +126,7 @@ const CommunicationsHub: React.FC = () => {
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         <AlertsPanel alertsStream={alertsStream} newMessages={alertMessages} />
         <StreamsPanel streams={streams} unreads={unreads} newMessages={streamMessages} />
+        <ForumPanel forumStream={forumStream} newMessages={newMessages} />
         <DirectMessagesPanel dmUnreads={dmUnreads} newMessages={dmMessages} />
         <AnnouncementsPanel announcementsStream={announcementsStream} newMessages={announcementMessages} />
 
