@@ -95,6 +95,28 @@ def validate_tenant_match(body_tenant_id: str) -> bool:
     return body_tenant_id == header_tenant
 
 
+def _ensure_global_streams(zulip_client):
+    """Create global (cross-tenant) streams if they don't exist.
+
+    These are NOT tenant-prefixed. Fails silently if streams exist.
+    """
+    global_names = [s["name"] for s in Config.GLOBAL_STREAMS] + [
+        "platform-announcements"
+    ]
+    for name in global_names:
+        stream_id = zulip_client.get_stream_id(name)
+        if stream_id is not None:
+            logger.debug("Global stream #%s already exists (id=%d)", name, stream_id)
+            continue
+        desc = "Platform-wide announcements"
+        if name == "general-forum":
+            desc = "Cross-tenant general forum"
+        if zulip_client.create_stream(name, desc, invite_only=False):
+            logger.info("Created global stream #%s", name)
+        else:
+            logger.error("Failed to create global stream #%s", name)
+
+
 def create_app():
     app = Flask(__name__)
 
@@ -118,6 +140,9 @@ def create_app():
 
     zulip = ZulipClient()
 
+    # Ensure global streams exist on startup (idempotent)
+    _ensure_global_streams(zulip)
+
     # ------------------------------------------------------------------
     # Health
     # ------------------------------------------------------------------
@@ -126,6 +151,14 @@ def create_app():
     @limiter.exempt
     def health():
         return jsonify({"status": "healthy"}), 200
+
+    @app.route("/readyz")
+    @limiter.exempt
+    def readyz():
+        """Readiness probe — checks Zulip connectivity."""
+        if zulip.health_check():
+            return jsonify({"status": "ready"}), 200
+        return jsonify({"status": "not ready", "reason": "zulip unreachable"}), 503
 
     # ------------------------------------------------------------------
     # Bot status
