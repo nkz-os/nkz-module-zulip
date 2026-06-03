@@ -317,12 +317,12 @@ def create_app():
     @app.route("/api/provisioning/sync", methods=["POST"])
     @require_auth(roles=["admin"])
     def sync_tenants():
-        """Reconcile stream state for a list of tenants.
+        """Reconcile stream state and user subscriptions for tenants.
 
         Body: {"tenants": [{"tenant_id": "x", "tenant_name": "X"}, ...]}
 
-        Creates any missing streams. Does NOT archive unknown ones
-        (that would be destructive without explicit intent).
+        Creates missing streams. Subscribes known users to existing
+        tenant streams. Does NOT archive unknown streams.
         """
         data = request.get_json()
         if not data or not isinstance(data.get("tenants"), list):
@@ -349,10 +349,35 @@ def create_app():
                 if zulip.create_stream(name, desc, invite_only=True):
                     created.append(name)
 
+            # Subscribe known users to tenant streams + global forum
+            subscribed = []
+            try:
+                conn = psycopg2.connect(Config.POSTGRES_URL)
+                try:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            "SELECT email FROM admin_platform.tenant_users "
+                            "WHERE tenant_id = %s",
+                            (tid,),
+                        )
+                        emails = [row[0] for row in cur.fetchall()]
+                finally:
+                    conn.close()
+
+                for email in emails:
+                    for tpl in templates:
+                        name = _stream_name(tid, tpl["suffix"])
+                        zulip.subscribe_user(email, name)
+                    zulip.subscribe_user(email, "general-forum")
+                    subscribed.append(email)
+            except Exception:
+                logger.exception("Failed to sync users for tenant %s", tid)
+
             results.append({
                 "tenant_id": tid,
                 "created": created,
                 "already_existed": skipped,
+                "users_synced": len(set(subscribed)),
             })
 
         return jsonify({"results": results}), 200
