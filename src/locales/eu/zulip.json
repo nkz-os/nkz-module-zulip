@@ -20,5 +20,7 @@
   "announcements.title": "Platform announcements",
   "announcements.empty": "No recent announcements",
   "quickReply.placeholder": "Type a message...",
-  "quickReply.send": "Send"
+  "quickReply.send": "Send",
+  "forum.title": "Foro Orokorra",
+  "forum.empty": "Oraindik ez dago mezurik foroan"
 }

@@ -20,5 +20,7 @@
   "announcements.title": "Anuncios de plataforma",
   "announcements.empty": "Sin anuncios recientes",
   "quickReply.placeholder": "Escribe un mensaje...",
-  "quickReply.send": "Enviar"
+  "quickReply.send": "Enviar",
+  "forum.title": "Foro General",
+  "forum.empty": "No hay mensajes en el foro aún"
 }

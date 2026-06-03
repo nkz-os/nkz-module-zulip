@@ -20,5 +20,7 @@
   "announcements.title": "Platform announcements",
   "announcements.empty": "No recent announcements",
   "quickReply.placeholder": "Type a message...",
-  "quickReply.send": "Send"
+  "quickReply.send": "Send",
+  "forum.title": "Fòrum General",
+  "forum.empty": "No hi ha missatges al fòrum encara"
 }
