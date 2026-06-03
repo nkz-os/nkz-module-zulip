@@ -29,16 +29,14 @@ spec:
             - sh
             - -c
             - |
-              echo "Waiting for dependencies..."
-              for svc in postgresql-service:5432 redis-service:6379 zulip-rabbitmq-service:5672 zulip-memcached-service:11211; do
-                host="${svc%:*}"
-                port="${svc#*:}"
-                echo "  Waiting for $host:$port ..."
-                until timeout 2 sh -c "echo >/dev/tcp/$host/$port" 2>/dev/null; do
-                  sleep 2
-                done
-                echo "  $host:$port ready."
-              done
+              echo "Waiting for PostgreSQL..."
+              until nc -z postgresql-service 5432; do sleep 2; done
+              echo "Waiting for Redis..."
+              until nc -z redis-service 6379; do sleep 2; done
+              echo "Waiting for RabbitMQ..."
+              until nc -z zulip-rabbitmq-service 5672; do sleep 2; done
+              echo "Waiting for Memcached..."
+              until nc -z zulip-memcached-service 11211; do sleep 2; done
               echo "All dependencies ready."
           resources:
             requests:
