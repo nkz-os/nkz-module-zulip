@@ -14,3 +14,9 @@ class Config:
         {"suffix": "general", "description": "Open team communication"},
         {"suffix": "alerts", "description": "Automated IoT and risk alerts"},
     ]
+    GLOBAL_STREAMS = [
+        {
+            "name": "general-forum",
+            "description": "Cross-tenant general forum",
+        },
+    ]
