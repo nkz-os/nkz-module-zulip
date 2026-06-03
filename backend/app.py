@@ -140,8 +140,14 @@ def create_app():
 
     zulip = ZulipClient()
 
-    # Ensure global streams exist on startup (idempotent)
-    _ensure_global_streams(zulip)
+    # Ensure global streams exist on startup (idempotent, non-fatal)
+    try:
+        _ensure_global_streams(zulip)
+    except Exception:
+        logger.warning(
+            "Could not verify global streams on startup (Zulip unreachable?). "
+            "Will retry on next /sync or /readyz probe."
+        )
 
     # ------------------------------------------------------------------
     # Health
