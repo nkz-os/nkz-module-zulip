@@ -18,3 +18,4 @@ docs/audits/
 *HANDOVER*.md
 HANDOFF.md
 CURRENT_STATE.md
+__pycache__/
