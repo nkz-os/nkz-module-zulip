@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: provisioner
-          image: ghcr.io/nkz-os/nkz-module-zulip/provisioner:latest
+          image: ghcr.io/nkz-os/nkz-module-zulip/provisioner@sha256:4ed47e30ed7a9045d2f2c7361649ab1c00775f51be79a32b61998f916cce1b40
           ports:
             - containerPort: 5000
               name: http
