@@ -12,13 +12,62 @@ on:
       - '.github/workflows/publish-frontend.yml'
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   publish:
-    permissions:
-      id-token: write
-      contents: read
-    uses: nkz-os/nkz/.github/workflows/_publish-module.yml@main
-    with:
-      module_id: zulip
-    secrets:
-      INTERNAL_SERVICE_SECRET: ${{ secrets.INTERNAL_SERVICE_SECRET }}
+    runs-on: ubuntu-latest
+    env:
+      EM: https://nkz.robotika.cloud
+      STATIC: https://nekazari.robotika.cloud
+      MODULE: zulip
+      VITE_API_URL: https://nkz.robotika.cloud
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: "10"
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+      - name: Build module
+        run: pnpm run build:module
+        env:
+          NKZ_VERSION_HASH: ${{ github.sha }}
+      - name: Get GitHub OIDC token
+        run: |
+          OIDC_TOKEN=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=nkz-publish" | jq -r .value)
+          echo "OIDC_TOKEN=${OIDC_TOKEN}" >> $GITHUB_ENV
+      - name: Publish to entity-manager
+        env:
+          SECRET: ${{ secrets.INTERNAL_SERVICE_SECRET }}
+        run: |
+          set -euo pipefail
+          SHA=$(echo "${{ github.sha }}" | cut -c1-40)
+          args=$(cd dist && find . -type f -printf '-F file=@%p;filename=%P ')
+          code=$(cd dist && curl -sS -o /tmp/pub.json -w '%{http_code}' \
+                 -H "X-Internal-Service-Secret: $SECRET" \
+                 -H "X-OIDC-Token: $OIDC_TOKEN" \
+                 -F "version_hash=$SHA" $args \
+                 "$EM/api/internal/modules/$MODULE/publish")
+          echo "publish HTTP $code"; cat /tmp/pub.json; echo
+          case "$code" in 200|201) ;; *) echo "::error::publish failed (HTTP $code)"; exit 1;; esac
+      - name: Verify pointer flipped + manifest served
+        run: |
+          set -euo pipefail
+          SHA=$(echo "${{ github.sha }}" | cut -c1-40)
+          curl -sS -o /tmp/resolve.json -w 'resolve HTTP %{http_code}\n' \
+               "$EM/api/internal/modules/$MODULE/resolve-url"
+          cat /tmp/resolve.json; echo
+          active=$(node -e "console.log(require('/tmp/resolve.json').version||'')")
+          [ "$active" = "$SHA" ] || { echo "::error::pointer not flipped (active=$active, expected=$SHA)"; exit 1; }
+          murl="$STATIC/modules/$MODULE/$SHA/mf-manifest.json"
+          code=$(curl -sS -o /tmp/mf.json -w '%{http_code}' "$murl")
+          bytes=$(wc -c < /tmp/mf.json)
+          echo "served manifest $murl -> HTTP $code, $bytes bytes"
+          [ "$code" = "200" ] && [ "$bytes" -gt 0 ] || { echo "::error::manifest not served"; exit 1; }
