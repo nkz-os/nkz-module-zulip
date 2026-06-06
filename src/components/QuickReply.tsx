@@ -40,7 +40,7 @@ const QuickReply: React.FC<Props> = ({ onSend, disabled = false }) => {
   );
 
   return (
-    <div className="flex items-end gap-2 p-2 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+    <div className="flex items-end gap-2 p-2 border-t border-nkz-border bg-nkz-surface">
       <textarea
         ref={inputRef}
         value={text}
@@ -49,12 +49,12 @@ const QuickReply: React.FC<Props> = ({ onSend, disabled = false }) => {
         placeholder={t('quickReply.placeholder')}
         disabled={disabled || sending}
         rows={1}
-        className="flex-1 resize-none rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-sm text-slate-800 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+        className="flex-1 resize-none rounded-nkz-lg border border-nkz-border-strong bg-nkz-canvas px-3 py-2 text-nkz-sm text-nkz-text-primary placeholder:text-nkz-text-muted focus:outline-none focus:ring-2 focus:ring-nkz-info disabled:opacity-50"
       />
       <button
         onClick={handleSend}
         disabled={disabled || sending || !text.trim()}
-        className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+        className="p-2 rounded-nkz-lg bg-nkz-info text-nkz-text-on-accent hover:bg-nkz-info-strong disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex-shrink-0"
         aria-label={t('quickReply.send')}
       >
         <Send className="w-4 h-4" />

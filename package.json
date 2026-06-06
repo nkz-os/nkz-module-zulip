@@ -19,6 +19,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@nekazari/design-tokens": "^0.1.0-alpha.2",
     "lucide-react": "^0.424.0"
   },
   "devDependencies": {

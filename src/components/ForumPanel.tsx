@@ -67,32 +67,32 @@ const ForumPanel: React.FC<Props> = ({ forumStream, newMessages }) => {
   );
 
   return (
-    <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+    <div className="border border-nkz-border rounded-nkz-lg overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 bg-nkz-success-soft hover:bg-nkz-success-soft/80 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <MessageSquareText className="w-4 h-4 text-green-600 dark:text-green-400" />
-          <span className="text-sm font-semibold text-green-800 dark:text-green-300">
+          <MessageSquareText className="w-4 h-4 text-nkz-success" />
+          <span className="text-nkz-sm font-semibold text-nkz-success-strong">
             {t('forum.title')}
           </span>
         </div>
         {expanded ? (
-          <ChevronUp className="w-4 h-4 text-green-400" />
+          <ChevronUp className="w-4 h-4 text-nkz-success" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-green-400" />
+          <ChevronDown className="w-4 h-4 text-nkz-success" />
         )}
       </button>
       {expanded && (
-        <div className="bg-white dark:bg-slate-900">
+        <div className="bg-nkz-surface">
           <div className="max-h-72 overflow-y-auto">
             {loading && messages.length === 0 ? (
-              <p className="text-sm text-slate-400 p-4 text-center">
+              <p className="text-nkz-sm text-nkz-text-muted p-4 text-center">
                 {t('loading')}
               </p>
             ) : messages.length === 0 ? (
-              <p className="text-sm text-slate-400 p-4 text-center">
+              <p className="text-nkz-sm text-nkz-text-muted p-4 text-center">
                 {t('forum.empty')}
               </p>
             ) : (

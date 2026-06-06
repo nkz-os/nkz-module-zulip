@@ -49,34 +49,34 @@ const AlertsPanel: React.FC<Props> = ({ alertsStream, newMessages }) => {
   const unreadCount = messages.filter((m) => !m.flags.includes('read')).length;
 
   return (
-    <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+    <div className="border border-nkz-border rounded-nkz-lg overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 bg-nkz-danger-soft hover:bg-nkz-danger-soft/80 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
-          <span className="text-sm font-semibold text-red-800 dark:text-red-300">
+          <AlertTriangle className="w-4 h-4 text-nkz-danger" />
+          <span className="text-nkz-sm font-semibold text-nkz-danger-strong">
             {t('alerts.title')}
           </span>
           {unreadCount > 0 && (
-            <span className="px-1.5 py-0.5 text-xs font-medium bg-red-600 text-white rounded-full">
+            <span className="px-1.5 py-0.5 text-nkz-xs font-medium bg-nkz-danger text-nkz-text-on-accent rounded-nkz-full">
               {unreadCount}
             </span>
           )}
         </div>
         {expanded ? (
-          <ChevronUp className="w-4 h-4 text-red-400" />
+          <ChevronUp className="w-4 h-4 text-nkz-danger" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-red-400" />
+          <ChevronDown className="w-4 h-4 text-nkz-danger" />
         )}
       </button>
       {expanded && (
-        <div className="max-h-64 overflow-y-auto bg-white dark:bg-slate-900">
+        <div className="max-h-64 overflow-y-auto bg-nkz-surface">
           {loading && messages.length === 0 ? (
-            <p className="text-sm text-slate-400 p-4 text-center">{t('loading')}</p>
+            <p className="text-nkz-sm text-nkz-text-muted p-4 text-center">{t('loading')}</p>
           ) : messages.length === 0 ? (
-            <p className="text-sm text-slate-400 p-4 text-center">{t('alerts.empty')}</p>
+            <p className="text-nkz-sm text-nkz-text-muted p-4 text-center">{t('alerts.empty')}</p>
           ) : (
             messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
           )}

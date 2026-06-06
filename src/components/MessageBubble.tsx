@@ -12,24 +12,24 @@ const MessageBubble: React.FC<Props> = ({ message }) => {
   const time = useMemo(() => formatRelativeTime(message.timestamp), [message.timestamp]);
 
   return (
-    <div className="flex gap-2 py-1.5 px-2 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded">
+    <div className="flex gap-2 py-1.5 px-2 hover:bg-nkz-canvas rounded-nkz-md">
       <img
         src={message.avatar_url}
         alt=""
-        className="w-7 h-7 rounded-full flex-shrink-0 mt-0.5"
+        className="w-7 h-7 rounded-nkz-full flex-shrink-0 mt-0.5"
         loading="lazy"
       />
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
-          <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">
+          <span className="text-nkz-sm font-medium text-nkz-text-primary truncate">
             {message.sender_full_name}
           </span>
-          <span className="text-xs text-slate-400 dark:text-slate-500 flex-shrink-0">
+          <span className="text-nkz-xs text-nkz-text-muted flex-shrink-0">
             {time}
           </span>
         </div>
         <div
-          className="text-sm text-slate-700 dark:text-slate-300 [&_p]:my-0.5 [&_code]:bg-slate-100 dark:[&_code]:bg-slate-700 [&_code]:px-1 [&_code]:rounded [&_a]:text-blue-600 dark:[&_a]:text-blue-400 [&_a]:underline break-words"
+          className="text-nkz-sm text-nkz-text-secondary [&_p]:my-0.5 [&_code]:bg-nkz-surface-sunken [&_code]:px-1 [&_code]:rounded [&_a]:text-nkz-info [&_a]:underline break-words"
           dangerouslySetInnerHTML={{ __html: safeHtml }}
         />
       </div>

@@ -99,32 +99,32 @@ const DirectMessagesPanel: React.FC<Props> = ({ dmUnreads, newMessages }) => {
   const totalUnread = dmUnreads.reduce((sum, u) => sum + u.unread_message_ids.length, 0);
 
   return (
-    <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+    <div className="border border-nkz-border rounded-nkz-lg overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 bg-nkz-canvas hover:bg-nkz-surface-sunken transition-colors"
       >
         <div className="flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+          <MessageSquare className="w-4 h-4 text-nkz-accent-base" />
+          <span className="text-nkz-sm font-semibold text-nkz-text-primary">
             {t('dm.title')}
           </span>
           {totalUnread > 0 && (
-            <span className="px-1.5 py-0.5 text-xs font-medium bg-purple-600 text-white rounded-full">
+            <span className="px-1.5 py-0.5 text-nkz-xs font-medium bg-nkz-accent-base text-nkz-text-on-accent rounded-nkz-full">
               {totalUnread}
             </span>
           )}
         </div>
         {expanded ? (
-          <ChevronUp className="w-4 h-4 text-slate-400" />
+          <ChevronUp className="w-4 h-4 text-nkz-text-muted" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-slate-400" />
+          <ChevronDown className="w-4 h-4 text-nkz-text-muted" />
         )}
       </button>
       {expanded && (
-        <div className="bg-white dark:bg-slate-900">
+        <div className="bg-nkz-surface">
           {conversations.length === 0 ? (
-            <p className="text-sm text-slate-400 p-4 text-center">{t('dm.empty')}</p>
+            <p className="text-nkz-sm text-nkz-text-muted p-4 text-center">{t('dm.empty')}</p>
           ) : (
             conversations.map((conv) => (
               <div key={conv.peerId}>
@@ -134,33 +134,33 @@ const DirectMessagesPanel: React.FC<Props> = ({ dmUnreads, newMessages }) => {
                       ? setOpenPeerId(null)
                       : openConversation(conv.peerId, conv.peerEmail)
                   }
-                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-100 dark:border-slate-800"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-nkz-canvas transition-colors border-b border-nkz-border"
                 >
                   {conv.avatarUrl ? (
                     <img
                       src={conv.avatarUrl}
                       alt=""
-                      className="w-7 h-7 rounded-full flex-shrink-0"
+                      className="w-7 h-7 rounded-nkz-full flex-shrink-0"
                     />
                   ) : (
-                    <span className="w-7 h-7 rounded-full flex-shrink-0 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 text-xs font-medium flex items-center justify-center">
+                    <span className="w-7 h-7 rounded-nkz-full flex-shrink-0 bg-nkz-accent-soft text-nkz-accent-strong text-nkz-xs font-medium flex items-center justify-center">
                       {conv.peerName.charAt(0).toUpperCase()}
                     </span>
                   )}
-                  <span className="text-sm text-slate-700 dark:text-slate-300 truncate flex-1 text-left">
+                  <span className="text-nkz-sm text-nkz-text-primary truncate flex-1 text-left">
                     {conv.peerName}
                   </span>
                   {conv.unreadCount > 0 && (
-                    <span className="px-1.5 py-0.5 text-xs font-medium bg-purple-600 text-white rounded-full">
+                    <span className="px-1.5 py-0.5 text-nkz-xs font-medium bg-nkz-accent-base text-nkz-text-on-accent rounded-nkz-full">
                       {conv.unreadCount}
                     </span>
                   )}
                 </button>
                 {openPeerId === conv.peerId && (
-                  <div className="border-t border-slate-100 dark:border-slate-800">
+                  <div className="border-t border-nkz-border">
                     <div className="max-h-64 overflow-y-auto">
                       {loadingMessages ? (
-                        <p className="text-sm text-slate-400 p-4 text-center">{t('loading')}</p>
+                        <p className="text-nkz-sm text-nkz-text-muted p-4 text-center">{t('loading')}</p>
                       ) : (
                         peerMessages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
                       )}

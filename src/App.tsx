@@ -79,10 +79,10 @@ const CommunicationsHub: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center w-full h-full bg-slate-50 dark:bg-slate-900">
+      <div className="flex items-center justify-center w-full h-full bg-nkz-canvas">
         <div className="text-center">
-          <div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-3" />
-          <p className="text-sm text-slate-500 dark:text-slate-400">{t('loading')}</p>
+          <div className="animate-spin w-8 h-8 border-2 border-nkz-info border-t-transparent rounded-nkz-full mx-auto mb-3" />
+          <p className="text-nkz-sm text-nkz-text-muted">{t('loading')}</p>
         </div>
       </div>
     );
@@ -90,22 +90,22 @@ const CommunicationsHub: React.FC = () => {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center w-full h-full bg-slate-50 dark:bg-slate-900">
+      <div className="flex items-center justify-center w-full h-full bg-nkz-canvas">
         <div className="text-center p-8">
-          <MessageCircle className="w-12 h-12 mx-auto mb-4 text-slate-400" />
-          <p className="text-slate-600 dark:text-slate-400 mb-2">{t('connectionError')}</p>
-          <p className="text-sm text-slate-400">{error}</p>
+          <MessageCircle className="w-12 h-12 mx-auto mb-4 text-nkz-text-muted" />
+          <p className="text-nkz-text-secondary mb-2">{t('connectionError')}</p>
+          <p className="text-nkz-sm text-nkz-text-muted">{error}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col w-full h-full bg-slate-50 dark:bg-slate-900">
-      <div className="flex items-center justify-between px-4 py-2.5 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm">
+    <div className="flex flex-col w-full h-full bg-nkz-canvas">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-nkz-surface border-b border-nkz-border shadow-nkz-sm">
         <div className="flex items-center gap-3">
-          <MessageCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-          <h1 className="text-base font-semibold text-slate-800 dark:text-slate-100">
+          <MessageCircle className="w-5 h-5 text-nkz-info" />
+          <h1 className="text-nkz-base font-semibold text-nkz-text-primary">
             {t('title')}
           </h1>
           <ConnectionStatus state={connectionState} />
@@ -115,7 +115,7 @@ const CommunicationsHub: React.FC = () => {
             href={zulipUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs flex items-center gap-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium px-3 py-1.5 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+            className="text-nkz-xs flex items-center gap-1 text-nkz-info hover:text-nkz-info-strong font-medium px-3 py-1.5 rounded-nkz-md hover:bg-nkz-info-soft transition-colors"
           >
             {t('hub.openFull')}
             <ExternalLink className="w-3 h-3" />
@@ -130,7 +130,7 @@ const CommunicationsHub: React.FC = () => {
         <DirectMessagesPanel dmUnreads={dmUnreads} newMessages={dmMessages} />
         <AnnouncementsPanel announcementsStream={announcementsStream} newMessages={announcementMessages} />
 
-        <p className="text-center text-xs text-slate-400 dark:text-slate-500 py-2">
+        <p className="text-center text-nkz-xs text-nkz-text-muted py-2">
           {t('poweredBy')}
         </p>
       </div>

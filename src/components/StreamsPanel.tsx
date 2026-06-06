@@ -26,27 +26,27 @@ const StreamsPanel: React.FC<Props> = ({ streams, unreads, newMessages }) => {
   };
 
   return (
-    <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+    <div className="border border-nkz-border rounded-nkz-lg overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 bg-nkz-canvas hover:bg-nkz-surface-sunken transition-colors"
       >
         <div className="flex items-center gap-2">
-          <Hash className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-          <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+          <Hash className="w-4 h-4 text-nkz-info" />
+          <span className="text-nkz-sm font-semibold text-nkz-text-primary">
             {t('streams.title')}
           </span>
         </div>
         {expanded ? (
-          <ChevronUp className="w-4 h-4 text-slate-400" />
+          <ChevronUp className="w-4 h-4 text-nkz-text-muted" />
         ) : (
-          <ChevronDown className="w-4 h-4 text-slate-400" />
+          <ChevronDown className="w-4 h-4 text-nkz-text-muted" />
         )}
       </button>
       {expanded && (
-        <div className="bg-white dark:bg-slate-900">
+        <div className="bg-nkz-surface">
           {regularStreams.length === 0 ? (
-            <p className="text-sm text-slate-400 p-4 text-center">{t('streams.empty')}</p>
+            <p className="text-nkz-sm text-nkz-text-muted p-4 text-center">{t('streams.empty')}</p>
           ) : (
             regularStreams.map((stream) => {
               const count = getUnreadCount(stream.stream_id);
@@ -55,16 +55,16 @@ const StreamsPanel: React.FC<Props> = ({ streams, unreads, newMessages }) => {
                 <div key={stream.stream_id}>
                   <button
                     onClick={() => setOpenStreamId(isOpen ? null : stream.stream_id)}
-                    className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-100 dark:border-slate-800 last:border-b-0"
+                    className="w-full flex items-center justify-between px-4 py-2.5 hover:bg-nkz-canvas transition-colors border-b border-nkz-border last:border-b-0"
                   >
                     <div className="flex items-center gap-2 min-w-0">
-                      <Hash className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
-                      <span className="text-sm text-slate-700 dark:text-slate-300 truncate">
+                      <Hash className="w-3.5 h-3.5 text-nkz-text-muted flex-shrink-0" />
+                      <span className="text-nkz-sm text-nkz-text-primary truncate">
                         {stream.name.replace(/^tenant-[^-]+-/, '')}
                       </span>
                     </div>
                     {count > 0 && (
-                      <span className="px-1.5 py-0.5 text-xs font-medium bg-blue-600 text-white rounded-full flex-shrink-0">
+                      <span className="px-1.5 py-0.5 text-nkz-xs font-medium bg-nkz-info text-nkz-text-on-accent rounded-nkz-full flex-shrink-0">
                         {count}
                       </span>
                     )}

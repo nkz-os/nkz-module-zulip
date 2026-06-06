@@ -76,16 +76,16 @@ const StreamDetail: React.FC<Props> = ({ streamId, streamName, newMessages }) =>
   const zulipUrl = window.__ENV__?.VITE_ZULIP_URL || '';
 
   return (
-    <div className="border-t border-slate-100 dark:border-slate-800">
+    <div className="border-t border-nkz-border">
       <div className="flex flex-wrap gap-1 p-2">
         {topics.map((topic) => (
           <button
             key={topic.name}
             onClick={() => loadTopicMessages(topic.name)}
-            className={`text-xs px-2 py-1 rounded-full border transition-colors ${
+            className={`text-nkz-xs px-2 py-1 rounded-nkz-full border transition-colors ${
               selectedTopic === topic.name
-                ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300'
-                : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'
+                ? 'bg-nkz-info-soft border-nkz-info text-nkz-info-strong'
+                : 'bg-nkz-canvas border-nkz-border text-nkz-text-secondary hover:bg-nkz-surface-sunken'
             }`}
           >
             {topic.name}
@@ -97,9 +97,9 @@ const StreamDetail: React.FC<Props> = ({ streamId, streamName, newMessages }) =>
         <div>
           <div className="max-h-72 overflow-y-auto">
             {loading ? (
-              <p className="text-sm text-slate-400 p-4 text-center">{t('loading')}</p>
+              <p className="text-nkz-sm text-nkz-text-muted p-4 text-center">{t('loading')}</p>
             ) : messages.length === 0 ? (
-              <p className="text-sm text-slate-400 p-4 text-center">{t('noMessages')}</p>
+              <p className="text-nkz-sm text-nkz-text-muted p-4 text-center">{t('noMessages')}</p>
             ) : (
               messages.map((msg) => <MessageBubble key={msg.id} message={msg} />)
             )}
@@ -111,7 +111,7 @@ const StreamDetail: React.FC<Props> = ({ streamId, streamName, newMessages }) =>
                 href={`${zulipUrl}/#narrow/stream/${encodeURIComponent(streamName)}/topic/${encodeURIComponent(selectedTopic)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1"
+                className="text-nkz-xs text-nkz-info hover:underline inline-flex items-center gap-1"
               >
                 {t('hub.openInZulip')} <ExternalLink className="w-3 h-3" />
               </a>
