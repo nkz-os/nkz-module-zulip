@@ -19,3 +19,10 @@ docs/audits/
 HANDOFF.md
 CURRENT_STATE.md
 __pycache__/
+
+# Security: sensitive files
+*.pem
+*.key
+apikey_*.txt
+*.apikey
+*-secret*
