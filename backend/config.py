@@ -10,6 +10,7 @@ class Config:
         "POSTGRES_URL",
         "postgresql://zulip_provisioner:@postgresql-service:5432/nekazari",
     )
+    INTERNAL_SERVICE_SECRET = os.environ.get("INTERNAL_SERVICE_SECRET", "")
     DEFAULT_STREAM_TEMPLATES = [
         {"suffix": "general", "description": "Open team communication"},
         {"suffix": "alerts", "description": "Automated IoT and risk alerts"},

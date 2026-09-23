@@ -11,6 +11,7 @@ Endpoints:
   POST /api/provisioning/announce               — Post to platform-announcements
 """
 
+import hmac
 import json
 import logging
 import os
@@ -421,6 +422,41 @@ def create_app():
         except Exception:
             logger.exception("Failed to post announcement")
             return jsonify({"error": "Announcement delivery failed"}), 500
+
+    # ------------------------------------------------------------------
+    # Internal message (service-to-service) — post to a stream/topic
+    # ------------------------------------------------------------------
+
+    def _internal_secret_matches(provided: str) -> bool:
+        secret = Config.INTERNAL_SERVICE_SECRET
+        return bool(secret) and hmac.compare_digest(provided or "", secret)
+
+    @app.route("/internal/message", methods=["POST"])
+    def internal_message():
+        """Post a message to a Zulip stream/topic (in-cluster callers).
+
+        Authenticated by X-Internal-Service-Secret (hmac.compare_digest) — NOT
+        gateway headers, this route is called by other backends over the cluster
+        network. Body: {"stream": ..., "topic": ..., "content": ...}
+        """
+        if not _internal_secret_matches(
+            request.headers.get("X-Internal-Service-Secret", "")
+        ):
+            return jsonify({"error": "Unauthorized"}), 401
+
+        data = request.get_json(silent=True) or {}
+        stream = data.get("stream")
+        topic = data.get("topic", "")
+        content = data.get("content")
+        if not stream or not content:
+            return jsonify({"error": "stream and content required"}), 400
+
+        try:
+            result = zulip.post_message(stream=stream, topic=topic, content=content)
+            return jsonify({"status": "sent", "message_id": result.get("id")}), 200
+        except Exception:
+            logger.exception("Failed to post internal message")
+            return jsonify({"error": "delivery failed"}), 500
 
     return app
 
