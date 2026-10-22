@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zulip-memcached
+  namespace: nekazari
+  labels:
+    app: zulip
+    component: memcached
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zulip
+      component: memcached
+  template:
+    metadata:
+      labels:
+        app: zulip
+        component: memcached
+    spec:
+      containers:
+        - name: memcached
+          image: memcached:1.6-alpine
+          args:
+            - "-m"
+            - "128"
+            - "-c"
+            - "1024"
+            - "-I"
+            - "2m"
+          ports:
+            - containerPort: 11211
+              name: memcached
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            tcpSocket:
+              port: 11211
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            tcpSocket:
+              port: 11211
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zulip-memcached-service
+  namespace: nekazari
+  labels:
+    app: zulip
+    component: memcached
+spec:
+  selector:
+    app: zulip
+    component: memcached
+  ports:
+    - port: 11211
+      targetPort: 11211
+      name: memcached

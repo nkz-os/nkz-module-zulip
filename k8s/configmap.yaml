@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zulip-config
+  namespace: nekazari
+  labels:
+    app: zulip
+data:
+  # Production values — replace YOUR_* placeholders
+  # This file is excluded from the main ArgoCD app and managed via overlay
+  external-host: "YOUR_ZULIP_DOMAIN"
+  admin-email: "admin@YOUR_DOMAIN"
+  keycloak-public-url: "https://YOUR_KEYCLOAK_HOST/auth"
+  keycloak-realm: "nekazari"
